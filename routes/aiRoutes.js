@@ -12,7 +12,7 @@ router.post('/generate-content', authParams, async (req, res) => {
     
     if (!topic) return res.status(400).json({ error: 'Topic is required' });
 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
     const wLimit = wordLimit || 100;
     const prompt = `Write an educational, easy-to-understand passage about ${topic}. It must be exactly ${wLimit} words long. Do not use complex jargon. Format as plain text.`;
     
@@ -36,7 +36,7 @@ router.post('/generate-quiz', authParams, async (req, res) => {
     const qCount = parseInt(numQuestions) || 3;
     const level = difficulty || 'Medium';
     
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
     const prompt = `Generate a multiple-choice quiz about ${topic} with ${qCount} questions at a ${level} level. You MUST return ONLY a valid JSON array of objects. Each object must have an 'id' (integer), a 'question' string, an 'options' array of 4 strings, and a 'correctIndex' integer matching the 0-based index of the correct option. Do not include markdown formatting like \`\`\`json.`;
     
     const result = await model.generateContent(prompt);
