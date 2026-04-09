@@ -65,8 +65,8 @@ class Api {
   }
 
   // Eval Methods & AI History Methods
-  async sendEvaluation(transcript) {
-    return await this.request('/evaluate', 'POST', { transcript });
+  async sendEvaluation(transcript, targetText) {
+    return await this.request('/evaluate', 'POST', { transcript, targetText });
   }
 
   async getReports() {

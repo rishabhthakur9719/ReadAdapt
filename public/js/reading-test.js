@@ -118,7 +118,7 @@ if (!SpeechRecognition) {
     
     if (finalTranscript.trim().length > 0) {
       try {
-        await api.sendEvaluation(finalTranscript); 
+        await api.sendEvaluation(finalTranscript, generatedPlainText); 
         micStatus.innerHTML = "Evaluation complete! <a href='/history' class='text-sky-600 underline font-bold'>View History</a>";
       } catch (error) {
         micStatus.innerText = "Failed to evaluate check console.";

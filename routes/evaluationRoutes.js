@@ -3,20 +3,18 @@ const router = express.Router();
 const Report = require('../models/Report');
 const authParams = require('../middleware/auth');
 
-// This standard test passage could later be pulled from a database or configuration based on user disability
-const TARGET_TEXT = "The quick brown fox jumps over the lazy dog. It was a sunny day, and everyone felt happy to be outside.".toLowerCase().replace(/[.,]/g, '');
-
-const calculateEvaluation = (transcript) => {
+const calculateEvaluation = (transcript, targetText) => {
   // Normalize strings to lowercase and strip punctuation
   const normalizedSpoken = transcript.toLowerCase().replace(/[.,]/g, '');
-  
+  const normalizedTarget = (targetText || "").toLowerCase().replace(/[.,]/g, '');
+
   const spokenWords = normalizedSpoken.split(/\s+/).filter(w => w.length > 0);
-  const targetWords = TARGET_TEXT.split(/\s+/).filter(w => w.length > 0);
+  const targetWords = normalizedTarget.split(/\s+/).filter(w => w.length > 0);
 
   // A very basic evaluation algorithm: comparing words sequentially
   let correctCount = 0;
   let missedWords = [];
-  
+
   // Create a naive matching scheme for the MVP: iterate through target words and see if spoken contains them
   // For better accuracy we'd use Levenshtein distance or a sequence alignment algorithm, but for MVP:
   const spokenSet = new Set(spokenWords);
@@ -28,20 +26,20 @@ const calculateEvaluation = (transcript) => {
     }
   });
 
-  const accuracyScore = Math.max(0, Math.round((correctCount / targetWords.length) * 100));
+  const accuracyScore = targetWords.length > 0 ? Math.max(0, Math.round((correctCount / targetWords.length) * 100)) : 0;
 
   return { accuracyScore, missedWords };
 };
 
 router.post('/evaluate', authParams, async (req, res) => {
   try {
-    const { transcript } = req.body;
-    
+    const { transcript, targetText } = req.body;
+
     if (!transcript) {
       return res.status(400).json({ error: 'Transcript is required' });
     }
 
-    const { accuracyScore, missedWords } = calculateEvaluation(transcript);
+    const { accuracyScore, missedWords } = calculateEvaluation(transcript, targetText);
 
     const report = new Report({
       userId: req.user._id,
@@ -51,7 +49,7 @@ router.post('/evaluate', authParams, async (req, res) => {
     });
 
     await report.save();
-    
+
     res.json({ message: 'Evaluation successful', report });
   } catch (error) {
     console.error(error);
