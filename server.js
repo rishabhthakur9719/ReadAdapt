@@ -13,8 +13,8 @@ app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
 // Inside server.js
-const dbURI = process.env.MONGODB_URI; 
-mongoose.connect(dbURI);
+// CORRECT
+mongoose.connect(process.env.MONGODB_URI)
 
 // Middleware
 app.use(express.json());
