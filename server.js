@@ -9,17 +9,8 @@ const aiRoutes = require('./routes/aiRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-});
-// Inside server.js
-// CORRECT
-mongoose.connect(process.env.MONGODB_URI)
 
-const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-// CORRECT: It asks the server environment for the key
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 // Middleware
 app.use(express.json());
