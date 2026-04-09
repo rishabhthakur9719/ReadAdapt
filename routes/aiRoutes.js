@@ -12,7 +12,7 @@ router.post('/generate-content', authParams, async (req, res) => {
     if (!topic) return res.status(400).json({ error: 'Topic is required' });
 
     // Upgraded to the latest reliable model
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
     const wLimit = wordLimit || 100;
     const prompt = `Write an educational, easy-to-understand passage about ${topic}. It must be exactly ${wLimit} words long. Do not use complex jargon. Format as plain text.`;
 
@@ -36,7 +36,7 @@ router.post('/generate-quiz', authParams, async (req, res) => {
 
     // Feature Upgrade: Forcing Native JSON Response
     const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash-latest",
+      model: "gemini-2.5-flash",
       generationConfig: { responseMimeType: "application/json" }
     });
 
