@@ -9,7 +9,12 @@ const aiRoutes = require('./routes/aiRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/readadapt';
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});
+// Inside server.js
+const dbURI = process.env.MONGODB_URI; 
+mongoose.connect(dbURI);
 
 // Middleware
 app.use(express.json());
