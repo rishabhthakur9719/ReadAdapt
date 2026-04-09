@@ -16,6 +16,11 @@ app.listen(PORT, () => {
 // CORRECT
 mongoose.connect(process.env.MONGODB_URI)
 
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+
+// CORRECT: It asks the server environment for the key
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+
 // Middleware
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
