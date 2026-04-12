@@ -281,12 +281,23 @@ h1, h2, h3 {
   100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
 }
 
-/* Accessibility Specs */
-.dyslexia-mode, .dyslexia-mode * {
+/* Accessibility Specs: Dyslexia */
+body.dyslexia-mode, 
+body.dyslexia-mode p, 
+body.dyslexia-mode span, 
+body.dyslexia-mode div, 
+body.dyslexia-mode h1, 
+body.dyslexia-mode h2, 
+body.dyslexia-mode h3, 
+body.dyslexia-mode a, 
+body.dyslexia-mode label,
+body.dyslexia-mode button,
+body.dyslexia-mode input {
   font-family: 'Lexend', sans-serif !important;
-  letter-spacing: 0.1em !important;
+  letter-spacing: 0.15em !important; /* Widened for better dyslexia readability */
   line-height: 2.2 !important;
-  font-weight: 700 !important;
+  font-weight: 700 !important; /* This will now work because we imported 700 */
+}
 }
 /* ADHD Quiz Masking Classes */
 .adhd-masked-question { 
