@@ -13,8 +13,19 @@ router.post('/generate-content', authParams, async (req, res) => {
 
     // Upgraded to the latest reliable model
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-    const wLimit = wordLimit || 100;
-    const prompt = `Write an educational, easy-to-understand passage about ${topic}. It must be exactly ${wLimit} words long. Do not use complex jargon. Format as plain text.`;
+    let wLimitNum = 250;
+    switch(wordLimit) {
+      case 'Concise': wLimitNum = 100; break;
+      case 'Regular': wLimitNum = 250; break;
+      case 'Detailed': wLimitNum = 500; break;
+      case 'Comprehensive': wLimitNum = 750; break;
+      case 'Profound': wLimitNum = 1000; break;
+      case 'Very Long': wLimitNum = 1500; break;
+      default:
+        if (!isNaN(parseInt(wordLimit))) wLimitNum = parseInt(wordLimit);
+        break;
+    }
+    const prompt = `Write an educational, easy-to-understand passage about ${topic}. It must be exactly ${wLimitNum} words long. Do not use complex jargon. Format as pure plain text without markdown.`;
 
     const result = await model.generateContent(prompt);
     const text = result.response.text();

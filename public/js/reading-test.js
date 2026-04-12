@@ -20,6 +20,9 @@ topicTitle.innerText = `${topic} Reading Test`;
 let currentUser = null;
 let currentMask = null;
 let generatedPlainText = '';
+let targetWordArray = [];
+let remainingSeconds = 0;
+let timerInterval = null;
 
 api.getMe().then(user => {
   if (!user.onboardingComplete) window.location.href = '/onboarding';
@@ -59,9 +62,11 @@ async function generateContent() {
     }
 
     // Calc time limit (assume 130 WPM)
-    const words = resText.split(' ').length;
-    const seconds = Math.ceil((words / 130) * 60);
-    timerDisplay.innerText = `Time Limit: ${seconds}s`;
+    targetWordArray = generatedPlainText.toLowerCase().replace(/[.,!?]/g, '').split(/\s+/).filter(w => w.length > 0);
+
+    const words = targetWordArray.length;
+    remainingSeconds = Math.ceil((words / 130) * 60);
+    timerDisplay.innerText = `Time Limit: ${remainingSeconds}s`;
     timerDisplay.classList.remove('hidden');
 
   } catch (e) {
@@ -99,6 +104,20 @@ if (!SpeechRecognition) {
     micBtn.classList.add('bg-red-500', 'animate-pulse');
     micBtn.classList.remove('bg-sky-600');
     micStatus.innerText = "Listening...";
+
+    // Start Timer
+    if(timerInterval) clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+      remainingSeconds--;
+      if (remainingSeconds <= 0) {
+          clearInterval(timerInterval);
+          timerDisplay.innerText = "Time's Up!";
+          timerDisplay.classList.replace('text-sky-600', 'text-red-500');
+          recognition.stop();
+      } else {
+          timerDisplay.innerText = `Time Limit: ${remainingSeconds}s`;
+      }
+    }, 1000);
   };
 
   recognition.onresult = (event) => {
@@ -107,21 +126,56 @@ if (!SpeechRecognition) {
       if (event.results[i].isFinal) finalTranscript += event.results[i][0].transcript;
       else interimTranscript += event.results[i][0].transcript;
     }
-    transcriptPreview.innerText = finalTranscript + interimTranscript;
+    
+    // Real time transcript tracking match logic
+    const currentFullTranscript = finalTranscript + interimTranscript;
+    const spokenArray = currentFullTranscript.toLowerCase().replace(/[.,!?]/g, '').split(/\s+/).filter(w => w.length > 0);
+    
+    let previewHTML = '';
+    for (let i = 0; i < spokenArray.length; i++) {
+        if (targetWordArray[i] && targetWordArray[i] === spokenArray[i]) {
+            previewHTML += `<span class="text-green-500">${spokenArray[i]}</span> `;
+        } else {
+            previewHTML += `<span class="text-red-500 font-bold">${spokenArray[i]}</span> `;
+        }
+    }
+    transcriptPreview.innerHTML = previewHTML;
   };
 
   recognition.onend = async () => {
     isRecording = false;
+    clearInterval(timerInterval);
     micBtn.classList.remove('bg-red-500', 'animate-pulse');
     micBtn.classList.add('bg-sky-600');
     micStatus.innerText = "Evaluating...";
     
     if (finalTranscript.trim().length > 0) {
+      const spokenWords = finalTranscript.toLowerCase().replace(/[.,!?]/g, '').split(/\s+/).filter(w => w.length > 0);
+      let correct = 0;
+      let missedStr = '';
+      
+      const spokenSet = new Set(spokenWords);
+      targetWordArray.forEach(word => {
+          if(spokenSet.has(word)) correct++;
+          else missedStr += `<span class="inline-block bg-red-100 text-red-600 px-2 py-1 rounded text-sm m-1">${word}</span>`;
+      });
+      const incorrect = targetWordArray.length - correct;
+      
+      transcriptPreview.innerHTML = `
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 mt-4 text-center">
+            <h4 class="font-bold text-2xl text-slate-800 mb-2">Result: <span class="text-red-500">${incorrect} Missed</span> / ${targetWordArray.length} Target Words</h4>
+            <div class="text-sm text-slate-600 mt-4 leading-relaxed">
+               <strong class="uppercase tracking-wider">Missed Words:</strong><br/>
+               ${missedStr || '<span class="text-green-600 font-bold mt-2 inline-block">Perfect! No missed target words.</span>'}
+            </div>
+        </div>
+      `;
+
       try {
         await api.sendEvaluation(finalTranscript, generatedPlainText); 
-        micStatus.innerHTML = "Evaluation complete! <a href='/history' class='text-sky-600 underline font-bold'>View History</a>";
+        micStatus.innerHTML = "Evaluation complete! <a href='/history' class='text-sky-600 underline font-bold px-4 py-2 border rounded hover:bg-sky-50 transition'>View History</a>";
       } catch (error) {
-        micStatus.innerText = "Failed to evaluate check console.";
+        micStatus.innerText = "Failed to evaluate against database.";
       }
     } else {
       micStatus.innerText = "No speech detected. Click to try again.";

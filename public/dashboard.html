@@ -10,7 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lexend:wght@400;500;600&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'Inter', sans-serif; transition: background-color 0.3s, color 0.3s; }
-    .dyslexia-mode { font-family: 'Lexend', sans-serif !important; letter-spacing: 0.05em !important; line-height: 2 !important; }
+    .dyslexia-mode { font-family: 'Lexend', sans-serif !important; letter-spacing: 0.1em !important; line-height: 2.2 !important; font-weight: 700 !important; }
     .font-serif-brand { font-family: 'Playfair Display', serif; }
     
     @keyframes fadeInUp {
@@ -66,7 +66,14 @@
       
       <div class="flex flex-col md:flex-row items-center gap-4 relative z-10">
         <input type="text" id="search-topic" placeholder="e.g., The Solar System..." class="flex-1 w-full px-5 py-4 text-lg border border-slate-300 rounded-xl focus:ring-4 focus:ring-sky-100 focus:border-sky-500 outline-none transition">
-        <input type="number" id="word-limit" placeholder="Words" value="100" class="w-full md:w-32 px-5 py-4 text-lg border border-slate-300 rounded-xl focus:ring-4 focus:ring-sky-100 focus:border-sky-500 outline-none transition">
+        <select id="word-limit" class="w-full md:w-48 px-5 py-4 text-lg border border-slate-300 rounded-xl focus:ring-4 focus:ring-sky-100 focus:border-sky-500 outline-none transition appearance-none bg-white font-medium cursor-pointer">
+          <option value="Concise">Concise</option>
+          <option value="Regular" selected>Regular</option>
+          <option value="Detailed">Detailed</option>
+          <option value="Comprehensive">Comprehensive</option>
+          <option value="Profound">Profound</option>
+          <option value="Very Long">Very Long</option>
+        </select>
         <button id="btn-search" class="bg-sky-600 hover:bg-sky-700 text-white text-lg px-8 py-4 rounded-xl font-bold transition shadow-md w-full md:w-auto h-full flex items-center justify-center gap-2">
           <i data-lucide="search" class="w-5 h-5"></i> Generate
         </button>

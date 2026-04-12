@@ -21,7 +21,7 @@ const btnTakeQuiz = document.getElementById('btn-take-quiz');
 
 let currentUser = null;
 let validatedTopic = '';
-let validatedLimit = 100;
+let validatedLimit = 'Regular';
 
 api.getMe().then(user => {
   if (!user.onboardingComplete) window.location.href = '/onboarding';
@@ -51,7 +51,7 @@ profileBtn.addEventListener('click', () => window.location.href = '/onboarding')
 
 btnSearch.addEventListener('click', async () => {
   const topic = searchTopic.value.trim();
-  const limit = parseInt(wordLimit.value) || 100;
+  const limit = wordLimit.value;
 
   if (!topic) {
     alert("Please enter a topic to search.");
@@ -75,6 +75,7 @@ btnSearch.addEventListener('click', async () => {
     
     generatedTitle.innerText = `${topic} Study Material`;
     generatedContent.innerText = generatedText;
+    generatedContent.classList.add('text-justify');
 
     loadingSpinner.classList.add('hidden');
     contentContainer.classList.remove('hidden');

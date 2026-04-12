@@ -9,6 +9,11 @@ const btnQuizNext = document.getElementById('btn-quiz-next');
 const quizResult = document.getElementById('quiz-result');
 const quizScoreText = document.getElementById('quiz-score-text');
 const quizActions = document.getElementById('quiz-actions');
+const quizConfigContainer = document.getElementById('quiz-config-container');
+const btnStartQuiz = document.getElementById('btn-start-quiz');
+const btnStartQuizMobile = document.getElementById('btn-start-quiz-mobile');
+const quizNumQ = document.getElementById('quiz-num-q');
+const quizDifficulty = document.getElementById('quiz-difficulty');
 
 const params = new URLSearchParams(window.location.search);
 const topic = params.get('topic') || 'General';
@@ -23,12 +28,25 @@ api.getMe().then(user => {
   if (!user.onboardingComplete) window.location.href = '/onboarding';
   currentUser = user;
   if(window.Theming) Theming.apply(user.specification);
-  generateQuiz();
+  // generateQuiz() removed from init.
 }).catch(() => { window.location.href = '/login'; });
 
-async function generateQuiz() {
+const initQuizFetch = () => {
+    const num = parseInt(quizNumQ.value) || 3;
+    const diff = quizDifficulty.value || 'Intermediate';
+    
+    quizConfigContainer.style.display = 'none';
+    quizContainer.style.display = 'flex';
+    
+    generateQuiz(num, diff);
+};
+
+btnStartQuiz.addEventListener('click', initQuizFetch);
+btnStartQuizMobile.addEventListener('click', initQuizFetch);
+
+async function generateQuiz(num, diff) {
   try {
-    const res = await api.generateQuiz(topic, 3, 'Medium');
+    const res = await api.generateQuiz(topic, num, diff);
     currentQuizzesData = res.questions;
     
     quizContainer.classList.remove('flex', 'flex-col', 'justify-center');
