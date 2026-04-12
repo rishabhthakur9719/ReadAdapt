@@ -73,10 +73,13 @@ class AdhdQuizMask {
     if(qElements.length === 0) return;
     
     qElements.forEach((el, idx) => {
+      // Remove old classes first
+      el.classList.remove('adhd-active-question', 'adhd-masked-question');
+      
       if (idx === this.index) {
-        el.style.display = 'block';
+        el.classList.add('adhd-active-question');
       } else {
-        el.style.display = 'none';
+        el.classList.add('adhd-masked-question');
       }
     });
     
@@ -97,3 +100,4 @@ class AdhdQuizMask {
     }
   }
 }
+  

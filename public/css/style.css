@@ -288,3 +288,13 @@ h1, h2, h3 {
   line-height: 2.2 !important;
   font-weight: 700 !important;
 }
+/* ADHD Quiz Masking Classes */
+.adhd-masked-question { 
+  transition: opacity 0.3s ease; 
+  opacity: 0.2; 
+  pointer-events: none; /* Prevents clicking faded options */
+}
+.adhd-active-question { 
+  opacity: 1.0; 
+  pointer-events: auto;
+}

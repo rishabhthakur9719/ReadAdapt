@@ -73,9 +73,22 @@ btnSearch.addEventListener('click', async () => {
     validatedTopic = topic;
     validatedLimit = limit;
     
-    generatedTitle.innerText = `${topic} Study Material`;
-    generatedContent.innerText = generatedText;
-    generatedContent.classList.add('text-justify');
+generatedTitle.innerText = `${topic} Study Material`;
+    
+    // ADHD logic check before injecting text
+    if (currentUser.specification === 'ADHD') {
+      const dashControls = document.getElementById('dashboard-adhd-controls');
+      const dashNextBtn = document.getElementById('btn-dash-next');
+      generatedContent.innerHTML = ''; // Clear text
+      generatedContent.classList.remove('text-justify'); // Remove justify for better ADHD readability
+      
+      new AdhdReadingMask(generatedText, generatedContent, dashNextBtn, dashControls);
+    } else {
+      // Normal / Dyslexia logic
+      document.getElementById('dashboard-adhd-controls')?.classList.add('hidden');
+      generatedContent.innerText = generatedText;
+      generatedContent.classList.add('text-justify');
+    }
 
     loadingSpinner.classList.add('hidden');
     contentContainer.classList.remove('hidden');
