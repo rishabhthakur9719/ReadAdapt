@@ -19,7 +19,12 @@ const Theming = {
 
 class AdhdReadingMask {
   constructor(text, passageEl, nextBtnEl, controlsEl) {
-    this.sentences = text.split(/(?<=\.|\?|\!)\s+/).filter(s => s.trim().length > 0);
+    // Remove line breaks and extra spaces
+    const sanitizedText = text.replace(/[\r\n]+/g, ' ').replace(/\s{2,}/g, ' ').trim();
+    // Split by sentence-ending punctuation followed by a space or end of string
+    this.sentences = sanitizedText.match(/[^.!?]+[.!?]+(?:\s|$)/g) || [sanitizedText];
+    // Clean up whitespace on individual sentences
+    this.sentences = this.sentences.map(s => s.trim()).filter(s => s.length > 0);
     this.index = 0;
     this.passageEl = passageEl;
     this.nextBtnEl = nextBtnEl;
