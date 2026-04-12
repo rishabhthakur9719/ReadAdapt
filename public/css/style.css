@@ -298,7 +298,6 @@ body.dyslexia-mode input {
   line-height: 2.2 !important;
   font-weight: 700 !important; /* This will now work because we imported 700 */
 }
-}
 /* ADHD Quiz Masking Classes */
 .adhd-masked-question { 
   transition: opacity 0.3s ease; 
