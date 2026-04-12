@@ -75,19 +75,29 @@ btnSearch.addEventListener('click', async () => {
     
 generatedTitle.innerText = `${topic} Study Material`;
     
-    // ADHD logic check before injecting text
+    generatedTitle.innerText = `${topic} Study Material`;
+    
+    // ADHD Check
     if (currentUser.specification === 'ADHD') {
       const dashControls = document.getElementById('dashboard-adhd-controls');
       const dashNextBtn = document.getElementById('btn-dash-next');
-      generatedContent.innerHTML = ''; // Clear text
-      generatedContent.classList.remove('text-justify'); // Remove justify for better ADHD readability
+      generatedContent.innerHTML = ''; 
+      generatedContent.className = "text-lg md:text-xl text-slate-700 leading-relaxed"; // Reset
       
       new AdhdReadingMask(generatedText, generatedContent, dashNextBtn, dashControls);
-    } else {
-      // Normal / Dyslexia logic
+      
+    // NEW: Explicit Dyslexia Force-Styling
+    } else if (currentUser.specification === 'Dyslexia') {
       document.getElementById('dashboard-adhd-controls')?.classList.add('hidden');
       generatedContent.innerText = generatedText;
-      generatedContent.classList.add('text-justify');
+      // We directly inject Tailwind arbitrary values to guarantee formatting
+      generatedContent.className = "text-xl md:text-2xl text-slate-900 font-['Lexend'] font-extrabold tracking-[0.2em] leading-[2.5] text-left";
+      
+    // Normal / Default check
+    } else {
+      document.getElementById('dashboard-adhd-controls')?.classList.add('hidden');
+      generatedContent.innerText = generatedText;
+      generatedContent.className = "text-lg md:text-xl text-slate-700 leading-relaxed text-justify";
     }
 
     loadingSpinner.classList.add('hidden');
