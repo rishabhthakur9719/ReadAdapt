@@ -34,19 +34,20 @@ api.getMe().then(user => {
 const initQuizFetch = () => {
     const num = parseInt(quizNumQ.value) || 3;
     const diff = quizDifficulty.value || 'Intermediate';
+    const sourceText = sessionStorage.getItem('currentGenerateText');
     
     quizConfigContainer.style.display = 'none';
     quizContainer.style.display = 'flex';
     
-    generateQuiz(num, diff);
+    generateQuiz(num, diff, sourceText);
 };
 
 btnStartQuiz.addEventListener('click', initQuizFetch);
 btnStartQuizMobile.addEventListener('click', initQuizFetch);
 
-async function generateQuiz(num, diff) {
+async function generateQuiz(num, diff, sourceText) {
   try {
-    const res = await api.generateQuiz(topic, num, diff);
+    const res = await api.generateQuiz(topic, num, diff, sourceText);
     currentQuizzesData = res.questions;
     
     quizContainer.classList.remove('flex', 'flex-col', 'justify-center');
@@ -79,12 +80,44 @@ async function generateQuiz(num, diff) {
 
 submitQuizBtn.addEventListener('click', async () => {
   let score = 0;
-  currentQuizzesData.forEach((q, idx) => {
+  
+  // Extract tracking array before replacing innerHTML
+  const userAnswers = currentQuizzesData.map((q, idx) => {
     const selected = document.querySelector(`input[name="q_${idx}"]:checked`);
-    if (selected && parseInt(selected.value) === q.correctIndex) {
+    return selected ? parseInt(selected.value) : -1;
+  });
+
+  // Inject review rendering
+  quizContainer.innerHTML = currentQuizzesData.map((q, idx) => {
+    const selectedVal = userAnswers[idx];
+    if (selectedVal === q.correctIndex) {
       score++;
     }
-  });
+    
+    return `
+      <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200">
+        <p class="font-bold text-lg mb-4 text-slate-800">${idx + 1}. ${q.question}</p>
+        <div class="space-y-3 pl-2">
+          ${q.options.map((opt, oIndex) => {
+             let optClass = 'bg-white border-slate-200';
+             if (oIndex === q.correctIndex) {
+                 optClass = 'bg-green-100 border-green-500 font-bold'; 
+             } else if (oIndex === selectedVal && selectedVal !== q.correctIndex) {
+                 optClass = 'bg-red-100 border-red-500 font-bold text-red-800'; 
+             }
+             return `
+            <div class="flex items-center space-x-3 p-3 rounded-lg border transition ${optClass}">
+              <span class="text-slate-700">${opt}</span>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>
+    `;
+  }).join('');
+  
+  // Reveal review without Adhd constraints on results
+  const newqElements = document.querySelectorAll('.quiz-question-block');
+  newqElements.forEach(el => el.style.display = 'block');
 
   quizScoreText.innerText = `You scored ${score} out of ${currentQuizzesData.length}!`;
   quizResult.classList.remove('hidden');

@@ -11,6 +11,7 @@
     .dyslexia-mode { font-family: 'Lexend', sans-serif !important; letter-spacing: 0.05em !important; line-height: 2 !important; }
     .font-serif-brand { font-family: 'Playfair Display', serif; }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body id="dynamic-body" class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
   <header class="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur border-b border-slate-200 px-6 py-4 shadow-sm flex items-center justify-between">
@@ -24,14 +25,26 @@
 
   <main class="flex-1 max-w-6xl mx-auto w-full p-6 mt-24">
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-      <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
+      <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 flex flex-col">
         <h2 class="text-2xl font-bold text-slate-800 mb-6">Reading History</h2>
+        
+        <!-- Accuracy Progress Graph -->
+        <div class="w-full mb-8" style="min-h: 200px">
+          <canvas id="accuracyChart"></canvas>
+        </div>
+
         <div id="reports-container" class="space-y-4">
           <p class="text-slate-500 italic">Loading...</p>
         </div>
       </div>
-      <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
+      <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 flex flex-col">
         <h2 class="text-2xl font-bold text-slate-800 mb-6">Quiz History</h2>
+        
+        <!-- Quiz Score Progress Graph -->
+        <div class="w-full mb-8" style="min-h: 200px">
+          <canvas id="quizChart"></canvas>
+        </div>
+
         <div id="quizzes-container" class="space-y-4">
           <p class="text-slate-500 italic">Loading...</p>
         </div>

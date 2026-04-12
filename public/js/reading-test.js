@@ -8,6 +8,7 @@ const timerDisplay = document.getElementById('timer-display');
 const adhdControls = document.getElementById('adhd-controls');
 const btnNextSentence = document.getElementById('btn-next-sentence');
 const micBtn = document.getElementById('mic-btn');
+const btnFinishReading = document.getElementById('btn-finish-reading');
 const micStatus = document.getElementById('mic-status');
 const transcriptPreview = document.getElementById('transcript-preview');
 
@@ -82,21 +83,26 @@ if (!SpeechRecognition) {
   micStatus.innerText = "Speech API not supported in this browser.";
 } else {
   const recognition = new SpeechRecognition();
-  recognition.continuous = false;
-  recognition.interimResults = true;
+  recognition.continuous = true;
+  recognition.interimResults = false;
   recognition.lang = 'en-US';
 
   let isRecording = false;
   let finalTranscript = '';
 
   micBtn.addEventListener('click', () => {
-    if (isRecording) {
-      recognition.stop();
-    } else {
+    if (!isRecording) {
       finalTranscript = '';
       transcriptPreview.innerText = '';
       recognition.start();
+      micBtn.classList.add('hidden');
+      btnFinishReading.classList.remove('hidden');
     }
+  });
+
+  btnFinishReading.addEventListener('click', () => {
+      recognition.stop();
+      executeEvaluation();
   });
 
   recognition.onstart = () => {
@@ -114,6 +120,7 @@ if (!SpeechRecognition) {
           timerDisplay.innerText = "Time's Up!";
           timerDisplay.classList.replace('text-sky-600', 'text-red-500');
           recognition.stop();
+          executeEvaluation();
       } else {
           timerDisplay.innerText = `Time Limit: ${remainingSeconds}s`;
       }
@@ -121,15 +128,12 @@ if (!SpeechRecognition) {
   };
 
   recognition.onresult = (event) => {
-    let interimTranscript = '';
     for (let i = event.resultIndex; i < event.results.length; ++i) {
-      if (event.results[i].isFinal) finalTranscript += event.results[i][0].transcript;
-      else interimTranscript += event.results[i][0].transcript;
+      if (event.results[i].isFinal) finalTranscript += event.results[i][0].transcript + " ";
     }
     
     // Real time transcript tracking match logic
-    const currentFullTranscript = finalTranscript + interimTranscript;
-    const spokenArray = currentFullTranscript.toLowerCase().replace(/[.,!?]/g, '').split(/\s+/).filter(w => w.length > 0);
+    const spokenArray = finalTranscript.toLowerCase().replace(/[.,!?]/g, '').split(/\s+/).filter(w => w.length > 0);
     
     let previewHTML = '';
     for (let i = 0; i < spokenArray.length; i++) {
@@ -142,10 +146,16 @@ if (!SpeechRecognition) {
     transcriptPreview.innerHTML = previewHTML;
   };
 
-  recognition.onend = async () => {
+  recognition.onend = () => {
+     // Hardware cutoff fallback. Real evaluation runs on executeEvaluation button click.
+     isRecording = false;
+  };
+
+  async function executeEvaluation() {
     isRecording = false;
     clearInterval(timerInterval);
-    micBtn.classList.remove('bg-red-500', 'animate-pulse');
+    btnFinishReading.classList.add('hidden');
+    micBtn.classList.remove('hidden', 'bg-red-500', 'animate-pulse');
     micBtn.classList.add('bg-sky-600');
     micStatus.innerText = "Evaluating...";
     
@@ -178,7 +188,7 @@ if (!SpeechRecognition) {
         micStatus.innerText = "Failed to evaluate against database.";
       }
     } else {
-      micStatus.innerText = "No speech detected. Click to try again.";
+      micStatus.innerText = "No speech detected. Click mic to try again.";
     }
-  };
+  }
 }

@@ -77,8 +77,8 @@ class Api {
     return await this.request('/generate-content', 'POST', { topic, wordLimit });
   }
 
-  async generateQuiz(topic, numQuestions, difficulty) {
-    return await this.request('/generate-quiz', 'POST', { topic, numQuestions, difficulty });
+  async generateQuiz(topic, numQuestions, difficulty, sourceText) {
+    return await this.request('/generate-quiz', 'POST', { topic, numQuestions, difficulty, sourceText });
   }
 
   async submitQuizReport(topic, score, totalQuestions) {

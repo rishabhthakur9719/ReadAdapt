@@ -282,7 +282,7 @@ h1, h2, h3 {
 }
 
 /* Accessibility Specs */
-.dyslexia-mode {
+.dyslexia-mode, .dyslexia-mode * {
   font-family: 'Lexend', sans-serif !important;
   letter-spacing: 0.1em !important;
   line-height: 2.2 !important;

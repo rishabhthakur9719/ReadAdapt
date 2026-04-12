@@ -39,7 +39,7 @@ router.post('/generate-content', authParams, async (req, res) => {
 
 router.post('/generate-quiz', authParams, async (req, res) => {
   try {
-    const { topic, numQuestions, difficulty } = req.body;
+    const { topic, numQuestions, difficulty, sourceText } = req.body;
     if (!topic) return res.status(400).json({ error: 'Topic is required' });
 
     const qCount = parseInt(numQuestions) || 3;
@@ -51,8 +51,9 @@ router.post('/generate-quiz', authParams, async (req, res) => {
       generationConfig: { responseMimeType: "application/json" }
     });
 
-    const prompt = `Generate a multiple-choice quiz about ${topic} with ${qCount} questions at a ${level} level. 
-    Return a JSON array of objects. Each object must have an 'id' (integer), a 'question' (string), an 'options' (array of 4 strings), and a 'correctIndex' (integer 0-3).`;
+    const prompt = `Based ONLY on the following text, generate a multiple-choice quiz about ${topic} with ${qCount} questions at a ${level} level. 
+    Return a JSON array of objects. Each object must have an 'id' (integer), a 'question' (string), an 'options' (array of 4 strings), and a 'correctIndex' (integer 0-3).
+    Text: ${sourceText || "General knowledge about " + topic}`;
 
     const result = await model.generateContent(prompt);
 
