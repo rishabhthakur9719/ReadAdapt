@@ -37,13 +37,13 @@ class AdhdReadingMask {
     this.updateUI();
   }
   
-  updateUI() {
+ updateUI() {
     let html = '';
     this.sentences.forEach((sentence, idx) => {
       let isVisible = idx === this.index;
-      // Adds a Tailwind yellow highlight background to the active sentence
-      let activeClass = isVisible ? 'adhd-active-sentence bg-yellow-200 px-1 rounded-md' : 'adhd-masked-sentence';
-      html += `<span class="${activeClass} transition-all duration-300">${sentence} </span>`;
+      // Removed the bg-yellow-200. Now it strictly uses our opacity classes!
+      let activeClass = isVisible ? 'adhd-active-sentence' : 'adhd-masked-sentence';
+      html += `<span class="${activeClass} transition-opacity duration-300">${sentence} </span>`;
     });
     this.passageEl.innerHTML = html;
     
@@ -52,11 +52,16 @@ class AdhdReadingMask {
       this.prevBtnEl.disabled = this.index === 0;
     }
     
+    // SVG logic for the Next/Finish arrow
     if (this.nextBtnEl) {
-      this.nextBtnEl.innerText = this.index >= this.sentences.length - 1 ? 'Finish Reading' : 'Next Sentence';
+      if (this.index >= this.sentences.length - 1) {
+        this.nextBtnEl.innerHTML = `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>`;
+      } else {
+        this.nextBtnEl.innerHTML = `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>`;
+      }
     }
 
-    // Auto-scroll: Smoothly centers the active sentence on the screen
+    // Auto-scroll: Smoothly centers the active sentence
     setTimeout(() => {
       const activeSentence = this.passageEl.querySelector('.adhd-active-sentence');
       if (activeSentence) {
