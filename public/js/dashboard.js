@@ -91,7 +91,7 @@ generatedTitle.innerText = `${topic} Study Material`;
       document.getElementById('dashboard-adhd-controls')?.classList.add('hidden');
       generatedContent.innerText = generatedText;
       // We directly inject Tailwind arbitrary values to guarantee formatting
-      generatedContent.className = "text-xl md:text-2xl text-slate-900 font-['Lexend'] font-extrabold tracking-[0.2em] leading-[2.5] text-left";
+      generatedContent.className = "text-xl md:text-2xl text-slate-700 font-['Lexend'] font-extrabold tracking-[0.2em] leading-[2.5] text-left";
       
     // Normal / Default check
     } else {

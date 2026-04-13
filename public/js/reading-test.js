@@ -55,11 +55,19 @@ async function generateContent() {
     micBtn.classList.add('bg-sky-600', 'hover:bg-sky-700', 'hover:scale-105');
     micStatus.innerText = "Click the microphone to start reading";
 
-    if (currentUser.specification === 'ADHD') {
+if (currentUser.specification === 'ADHD') {
       currentMask = new AdhdReadingMask(resText, targetPassage, btnNextSentence, adhdControls);
+      
+    // NEW: Explicit Dyslexia Force-Styling for Reading Test
+    } else if (currentUser.specification === 'Dyslexia') {
+      adhdControls.classList.add('hidden');
+      // Force the heavy classes directly into the paragraph tag
+      targetPassage.innerHTML = `<p class="text-2xl md:text-3xl text-slate-700 font-['Lexend'] font-extrabold tracking-[0.2em] leading-[2.5] text-left p-4">${resText}</p>`;
+      
+    // Normal / Default check
     } else {
       adhdControls.classList.add('hidden');
-      targetPassage.innerHTML = `<p class="fade-in">${resText}</p>`;
+      targetPassage.innerHTML = `<p class="fade-in text-lg md:text-xl text-slate-700 leading-relaxed text-justify">${resText}</p>`;
     }
 
     // Calc time limit (assume 130 WPM)
