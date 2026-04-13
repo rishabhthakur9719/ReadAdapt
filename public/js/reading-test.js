@@ -56,7 +56,11 @@ async function generateContent() {
     micStatus.innerText = "Click the microphone to start reading";
 
 if (currentUser.specification === 'ADHD') {
-      currentMask = new AdhdReadingMask(resText, targetPassage, btnNextSentence, adhdControls);
+      const adhdControls = document.getElementById('adhd-controls');
+      const btnNextSentence = document.getElementById('btn-next-sentence');
+      const btnPrevSentence = document.getElementById('btn-prev-sentence'); // Get new Prev button
+      
+      currentMask = new AdhdReadingMask(resText, targetPassage, btnPrevSentence, btnNextSentence, adhdControls);
       
     // NEW: Explicit Dyslexia Force-Styling for Reading Test
     } else if (currentUser.specification === 'Dyslexia') {

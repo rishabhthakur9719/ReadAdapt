@@ -78,13 +78,16 @@ generatedTitle.innerText = `${topic} Study Material`;
     generatedTitle.innerText = `${topic} Study Material`;
     
     // ADHD Check
-    if (currentUser.specification === 'ADHD') {
+if (currentUser.specification === 'ADHD') {
       const dashControls = document.getElementById('dashboard-adhd-controls');
       const dashNextBtn = document.getElementById('btn-dash-next');
-      generatedContent.innerHTML = ''; 
-      generatedContent.className = "text-lg md:text-xl text-slate-700 leading-relaxed"; // Reset
+      const dashPrevBtn = document.getElementById('btn-dash-prev'); // Get new Prev button
       
-      new AdhdReadingMask(generatedText, generatedContent, dashNextBtn, dashControls);
+      generatedContent.innerHTML = ''; 
+      generatedContent.className = "text-lg md:text-xl text-slate-700 leading-relaxed"; 
+      
+      // Pass both buttons into the mask
+      new AdhdReadingMask(generatedText, generatedContent, dashPrevBtn, dashNextBtn, dashControls);
       
     // NEW: Explicit Dyslexia Force-Styling
     } else if (currentUser.specification === 'Dyslexia') {

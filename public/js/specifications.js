@@ -18,22 +18,22 @@ const Theming = {
 };
 
 class AdhdReadingMask {
-  constructor(text, passageEl, nextBtnEl, controlsEl) {
-    // Remove line breaks and extra spaces
+  constructor(text, passageEl, prevBtnEl, nextBtnEl, controlsEl) {
     const sanitizedText = text.replace(/[\r\n]+/g, ' ').replace(/\s{2,}/g, ' ').trim();
-    // Split by sentence-ending punctuation followed by a space or end of string
     this.sentences = sanitizedText.match(/[^.!?]+[.!?]+(?:\s|$)/g) || [sanitizedText];
-    // Clean up whitespace on individual sentences
     this.sentences = this.sentences.map(s => s.trim()).filter(s => s.length > 0);
+    
     this.index = 0;
     this.passageEl = passageEl;
+    this.prevBtnEl = prevBtnEl;
     this.nextBtnEl = nextBtnEl;
     this.controlsEl = controlsEl;
     
     if (this.controlsEl) this.controlsEl.classList.remove('hidden');
     
-    // override native click to prevent multiple assignments if reconstructed
-    this.nextBtnEl.onclick = () => this.nextSentence();
+    if (this.prevBtnEl) this.prevBtnEl.onclick = () => this.prevSentence();
+    if (this.nextBtnEl) this.nextBtnEl.onclick = () => this.nextSentence();
+    
     this.updateUI();
   }
   
@@ -41,15 +41,42 @@ class AdhdReadingMask {
     let html = '';
     this.sentences.forEach((sentence, idx) => {
       let isVisible = idx === this.index;
-      html += `<span class="adhd-masked-sentence ${isVisible ? 'adhd-active-sentence' : ''}">${sentence} </span>`;
+      // Adds a Tailwind yellow highlight background to the active sentence
+      let activeClass = isVisible ? 'adhd-active-sentence bg-yellow-200 px-1 rounded-md' : 'adhd-masked-sentence';
+      html += `<span class="${activeClass} transition-all duration-300">${sentence} </span>`;
     });
     this.passageEl.innerHTML = html;
-    this.nextBtnEl.innerText = this.index >= this.sentences.length - 1 ? 'Finish' : 'Next Sentence';
+    
+    // Disable 'Previous' if we are on the first sentence
+    if (this.prevBtnEl) {
+      this.prevBtnEl.disabled = this.index === 0;
+    }
+    
+    if (this.nextBtnEl) {
+      this.nextBtnEl.innerText = this.index >= this.sentences.length - 1 ? 'Finish Reading' : 'Next Sentence';
+    }
+
+    // Auto-scroll: Smoothly centers the active sentence on the screen
+    setTimeout(() => {
+      const activeSentence = this.passageEl.querySelector('.adhd-active-sentence');
+      if (activeSentence) {
+        activeSentence.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 50);
   }
   
   nextSentence() {
     if (this.index < this.sentences.length - 1) {
       this.index++;
+      this.updateUI();
+    } else {
+      if (this.controlsEl) this.controlsEl.classList.add('hidden'); // Hide bar when finished
+    }
+  }
+
+  prevSentence() {
+    if (this.index > 0) {
+      this.index--;
       this.updateUI();
     }
   }
