@@ -66,7 +66,7 @@ if (currentUser.specification === 'ADHD') {
     } else if (currentUser.specification === 'Dyslexia') {
       adhdControls.classList.add('hidden');
       // Force the heavy classes directly into the paragraph tag
-      targetPassage.innerHTML = `<p class="text-2xl md:text-3xl text-slate-700 font-['Lexend'] font-extrabold tracking-[0.2em] leading-[2.5] text-left p-4">${resText}</p>`;
+      targetPassage.innerHTML = `<p class="text-2xl md:text-3xl text-slate-700 font-['Lexend'] font-bold tracking-[0.2em] leading-[2.5] text-left p-4">${resText}</p>`;
       
     // Normal / Default check
     } else {
@@ -96,7 +96,7 @@ if (!SpeechRecognition) {
 } else {
   const recognition = new SpeechRecognition();
   recognition.continuous = true;
-  recognition.interimResults = false;
+  recognition.interimResults = true;
   recognition.lang = 'en-US';
 
   let isRecording = false;
@@ -140,13 +140,21 @@ if (!SpeechRecognition) {
   };
 
   recognition.onresult = (event) => {
+    let interimTranscript = '';
+    
     for (let i = event.resultIndex; i < event.results.length; ++i) {
-      if (event.results[i].isFinal) finalTranscript += event.results[i][0].transcript + " ";
+      if (event.results[i].isFinal) {
+        finalTranscript += event.results[i][0].transcript + " ";
+      } else {
+        interimTranscript += event.results[i][0].transcript;
+      }
     }
     
-    // Real time transcript tracking match logic
-    const spokenArray = finalTranscript.toLowerCase().replace(/[.,!?]/g, '').split(/\s+/).filter(w => w.length > 0);
+    // Combine finalized text with real-time in-progress text
+    const currentSpeech = finalTranscript + " " + interimTranscript;
+    const spokenArray = currentSpeech.toLowerCase().replace(/[.,!?]/g, '').split(/\s+/).filter(w => w.length > 0);
     
+    // Real time transcript tracking match logic
     let previewHTML = '';
     for (let i = 0; i < spokenArray.length; i++) {
         if (targetWordArray[i] && targetWordArray[i] === spokenArray[i]) {
@@ -172,23 +180,41 @@ if (!SpeechRecognition) {
     micStatus.innerText = "Evaluating...";
     
     if (finalTranscript.trim().length > 0) {
+      // We keep this as a normal array now, NO MORE SET!
       const spokenWords = finalTranscript.toLowerCase().replace(/[.,!?]/g, '').split(/\s+/).filter(w => w.length > 0);
       let correct = 0;
-      let missedStr = '';
+      let annotatedTextHTML = '';
       
-      const spokenSet = new Set(spokenWords);
+      // Build the full text breakdown word by word
       targetWordArray.forEach(word => {
-          if(spokenSet.has(word)) correct++;
-          else missedStr += `<span class="inline-block bg-red-100 text-red-600 px-2 py-1 rounded text-sm m-1">${word}</span>`;
+          // Find the exact word in the spoken list
+          const matchIndex = spokenWords.indexOf(word);
+          
+          if (matchIndex !== -1) {
+              correct++;
+              // Cross it off the list so it can't be reused for duplicates
+              spokenWords.splice(matchIndex, 1);
+              
+              // Correct word: Green and bold
+              annotatedTextHTML += `<span class="text-green-500 font-bold">${word}</span> `;
+          } else {
+              // Missed/Incorrect word: Red, bold, and underlined
+              annotatedTextHTML += `<span class="text-red-500 font-bold underline">${word}</span> `;
+          }
       });
+      
       const incorrect = targetWordArray.length - correct;
       
+      // Inject the beautiful new breakdown UI
       transcriptPreview.innerHTML = `
-        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 mt-4 text-center">
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 mt-4 text-center w-full">
             <h4 class="font-bold text-2xl text-slate-800 mb-2">Result: <span class="text-red-500">${incorrect} Missed</span> / ${targetWordArray.length} Target Words</h4>
-            <div class="text-sm text-slate-600 mt-4 leading-relaxed">
-               <strong class="uppercase tracking-wider">Missed Words:</strong><br/>
-               ${missedStr || '<span class="text-green-600 font-bold mt-2 inline-block">Perfect! No missed target words.</span>'}
+            
+            <div class="mt-6 text-lg md:text-xl leading-relaxed text-center border-t border-slate-100 pt-6">
+               <strong class="block uppercase tracking-wider text-sm text-slate-500 mb-4">Detailed Word Breakdown:</strong>
+               <div class="p-4 bg-slate-50 rounded-lg border border-slate-100">
+                 ${annotatedTextHTML}
+               </div>
             </div>
         </div>
       `;

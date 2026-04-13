@@ -37,7 +37,7 @@ const initQuizFetch = () => {
     const sourceText = sessionStorage.getItem('currentGenerateText');
     
     quizConfigContainer.style.display = 'none';
-    quizContainer.style.display = 'flex';
+    quizContainer.style.display = 'block';
     
     generateQuiz(num, diff, sourceText);
 };
@@ -50,15 +50,23 @@ async function generateQuiz(num, diff, sourceText) {
     const res = await api.generateQuiz(topic, num, diff, sourceText);
     currentQuizzesData = res.questions;
     
+    // NEW: Check for Dyslexia mode and swap the text styling classes
+    let qTextClass = "font-bold text-lg mb-4 text-slate-800";
+    let optTextClass = "text-slate-700";
+    if (currentUser.specification === 'Dyslexia') {
+        qTextClass = "text-xl md:text-2xl text-slate-900 font-['Lexend'] font-bold tracking-[0.2em] leading-[2.5] mb-4";
+        optTextClass = "text-lg md:text-xl text-slate-900 font-['Lexend'] font-bold tracking-[0.2em] leading-[2.5]";
+    }
+
     quizContainer.classList.remove('flex', 'flex-col', 'justify-center');
     quizContainer.innerHTML = currentQuizzesData.map((q, qIndex) => `
       <div class="quiz-question-block bg-slate-50 p-6 rounded-2xl border border-slate-200">
-        <p class="font-bold text-lg mb-4 text-slate-800">${qIndex + 1}. ${q.question}</p>
-        <div class="space-y-3 pl-2">
+        <p class="${qTextClass}">${qIndex + 1}. ${q.question}</p>
+        <div class="space-y-4 pl-2">
           ${q.options.map((opt, oIndex) => `
-            <label class="flex items-center space-x-3 cursor-pointer p-3 rounded-lg hover:bg-slate-100 border border-transparent hover:border-slate-200 transition">
-              <input type="radio" name="q_${qIndex}" value="${oIndex}" class="w-5 h-5 text-indigo-600 border-gray-300 focus:ring-indigo-500">
-              <span class="text-slate-700">${opt}</span>
+            <label class="flex items-center space-x-4 cursor-pointer p-3 rounded-lg hover:bg-slate-100 border border-transparent hover:border-slate-200 transition">
+              <input type="radio" name="q_${qIndex}" value="${oIndex}" class="w-5 h-5 mt-1 shrink-0 text-indigo-600 border-gray-300 focus:ring-indigo-500">
+              <span class="${optTextClass}">${opt}</span>
             </label>
           `).join('')}
         </div>
@@ -68,6 +76,8 @@ async function generateQuiz(num, diff, sourceText) {
     quizActions.style.display = 'flex';
 
     if (currentUser.specification === 'ADHD') {
+      const qBlocks = document.querySelectorAll('.quiz-question-block');
+      qBlocks.forEach(block => block.classList.add('opacity-20', 'pointer-events-none'));
       currentMask = new AdhdQuizMask(btnQuizNext, submitQuizBtn);
     } else {
       submitQuizBtn.classList.remove('hidden');
@@ -88,6 +98,15 @@ submitQuizBtn.addEventListener('click', async () => {
   });
 
   // Inject review rendering
+ // NEW: Check for Dyslexia mode and swap the text styling classes for the Review screen
+  let qTextClass = "font-bold text-lg mb-4 text-slate-800";
+  let optTextClass = "text-slate-700";
+  if (currentUser.specification === 'Dyslexia') {
+      qTextClass = "text-xl md:text-2xl text-slate-900 font-['Lexend'] font-bold tracking-[0.2em] leading-[2.5] mb-4";
+      optTextClass = "text-lg md:text-xl text-slate-900 font-['Lexend'] font-bold tracking-[0.2em] leading-[2.5]";
+  }
+
+  // Inject review rendering
   quizContainer.innerHTML = currentQuizzesData.map((q, idx) => {
     const selectedVal = userAnswers[idx];
     if (selectedVal === q.correctIndex) {
@@ -95,9 +114,9 @@ submitQuizBtn.addEventListener('click', async () => {
     }
     
     return `
-      <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200">
-        <p class="font-bold text-lg mb-4 text-slate-800">${idx + 1}. ${q.question}</p>
-        <div class="space-y-3 pl-2">
+      <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200 mb-6">
+        <p class="${qTextClass}">${idx + 1}. ${q.question}</p>
+        <div class="space-y-4 pl-2">
           ${q.options.map((opt, oIndex) => {
              let optClass = 'bg-white border-slate-200';
              if (oIndex === q.correctIndex) {
@@ -106,8 +125,8 @@ submitQuizBtn.addEventListener('click', async () => {
                  optClass = 'bg-red-100 border-red-500 font-bold text-red-800'; 
              }
              return `
-            <div class="flex items-center space-x-3 p-3 rounded-lg border transition ${optClass}">
-              <span class="text-slate-700">${opt}</span>
+            <div class="flex items-start space-x-4 p-4 rounded-lg border transition ${optClass}">
+              <span class="${optTextClass}">${opt}</span>
             </div>`;
           }).join('')}
         </div>

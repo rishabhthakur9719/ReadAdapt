@@ -5,22 +5,23 @@ const authParams = require('../middleware/auth');
 
 const calculateEvaluation = (transcript, targetText) => {
   // Normalize strings to lowercase and strip punctuation
-  const normalizedSpoken = transcript.toLowerCase().replace(/[.,]/g, '');
-  const normalizedTarget = (targetText || "").toLowerCase().replace(/[.,]/g, '');
+  const normalizedSpoken = transcript.toLowerCase().replace(/[.,!?]/g, '');
+  const normalizedTarget = (targetText || "").toLowerCase().replace(/[.,!?]/g, '');
 
   const spokenWords = normalizedSpoken.split(/\s+/).filter(w => w.length > 0);
   const targetWords = normalizedTarget.split(/\s+/).filter(w => w.length > 0);
 
-  // A very basic evaluation algorithm: comparing words sequentially
   let correctCount = 0;
   let missedWords = [];
 
-  // Create a naive matching scheme for the MVP: iterate through target words and see if spoken contains them
-  // For better accuracy we'd use Levenshtein distance or a sequence alignment algorithm, but for MVP:
-  const spokenSet = new Set(spokenWords);
+  // Iterate through target words and consume spoken words one by one
   targetWords.forEach(word => {
-    if (spokenSet.has(word)) {
+    const matchIndex = spokenWords.indexOf(word);
+    
+    if (matchIndex !== -1) {
       correctCount++;
+      // Consume the word so it cannot be counted twice
+      spokenWords.splice(matchIndex, 1);
     } else {
       missedWords.push(word);
     }

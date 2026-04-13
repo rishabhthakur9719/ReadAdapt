@@ -37,14 +37,30 @@ class AdhdReadingMask {
     this.updateUI();
   }
   
- updateUI() {
-    let html = '';
+updateUI() {
+    // 1. Make the container relative so the black filter can cover it
+    this.passageEl.classList.add('relative');
+
+    // 2. The Black Filter: We use negative margins (-inset-6) to make it stretch 
+    // to the edges of the white container box, covering the padding too.
+    let html = '<div class="absolute -inset-6 md:-inset-10 bg-slate-900/85 z-10 rounded-3xl pointer-events-none transition-all duration-500"></div>';
+
+    // 3. The Text Wrapper
+    html += '<div class="relative">';
+
     this.sentences.forEach((sentence, idx) => {
       let isVisible = idx === this.index;
-      // Removed the bg-yellow-200. Now it strictly uses our opacity classes!
-      let activeClass = isVisible ? 'adhd-active-sentence' : 'adhd-masked-sentence';
-      html += `<span class="${activeClass} transition-opacity duration-300">${sentence} </span>`;
+      
+      // Active: Elevated ABOVE the black filter (z-20), bright background, popping out
+      // Inactive: Pushed BEHIND the black filter (z-0), letting the darkness shadow it
+      let activeClass = isVisible 
+        ? 'relative z-20 bg-white text-slate-900 px-2 py-1 rounded-xl font-bold shadow-[0_0_20px_rgba(0,0,0,0.6)] transition-all duration-300' 
+        : 'relative z-0 text-slate-800 transition-all duration-300';
+      
+      html += `<span class="${activeClass}">${sentence} </span>`;
     });
+    
+    html += '</div>';
     this.passageEl.innerHTML = html;
     
     // Disable 'Previous' if we are on the first sentence
@@ -61,9 +77,10 @@ class AdhdReadingMask {
       }
     }
 
+
     // Auto-scroll: Smoothly centers the active sentence
     setTimeout(() => {
-      const activeSentence = this.passageEl.querySelector('.adhd-active-sentence');
+      const activeSentence = this.passageEl.querySelector('.opacity-100'); // Targeted by Tailwind class now
       if (activeSentence) {
         activeSentence.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
@@ -105,13 +122,17 @@ class AdhdQuizMask {
     if(qElements.length === 0) return;
     
     qElements.forEach((el, idx) => {
-      // Remove old classes first
-      el.classList.remove('adhd-active-question', 'adhd-masked-question');
+      // Ensure the smooth fade transition is always applied
+      el.classList.add('transition-opacity', 'duration-300');
       
       if (idx === this.index) {
-        el.classList.add('adhd-active-question');
+        // Active Question: Fully visible, clickable
+        el.classList.add('opacity-100');
+        el.classList.remove('opacity-20', 'pointer-events-none');
       } else {
-        el.classList.add('adhd-masked-question');
+        // Shadowed Question: 20% opacity, unclickable
+        el.classList.add('opacity-20', 'pointer-events-none');
+        el.classList.remove('opacity-100');
       }
     });
     
